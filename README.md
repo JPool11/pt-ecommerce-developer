@@ -5,9 +5,12 @@ Sección Shopify + componente React. Grid de productos manual desde el Theme Edi
 ## Archivos
 
 ```
+## Shopify
 sections/recommended-products-custom.liquid
 snippets/recommended-product-card.liquid
 assets/recommended-products-custom.css
+
+## React
 RecommendedProducts.jsx
 RecommendedProducts.css
 ```
@@ -62,7 +65,7 @@ Props: `title`, `description`, `products`, `buttonLabel`, `emptyMessage`, `class
 
 ## Decisiones técnicas
 
-**Blocks vs metafields:** Usé blocks y `product_list` porque encajan son fáciles de editar en el Theme Editor.
+**Blocks:** Usé blocks y `product_list` porque son fáciles de editar en el Theme Editor.
 
 **Performance:** Render server-side en Liquid, imágenes con `image_url` + `srcset`, sin librerias extras. `loading="lazy"` en las tarjetas.
 
@@ -72,8 +75,12 @@ Props: `title`, `description`, `products`, `buttonLabel`, `emptyMessage`, `class
 
 ## Mejoras futuras
 
-**Slider** Ahorra espacio vertical y es mas llamativo para el comprador.
+**Slider** Ahorra espacio vertical y es mas llamativo para el comprador y/o implemetacion de las sujerencias del cliente.
 
 ## Deploy
 
 Flujo habitual: rama -> PR -> preview del theme -> merge -> `shopify theme push`. Mantener un theme de backup en Admin por si hay que revertir y si hay mas de un desarrollador tocando el mismo archivo, crear rama individual por dev -> rama por feat -> pull -> merge a rama del dev -> PR
+
+## Vtex
+
+**Complejidad** Puede tener mayor complejidad de desarrollo e implementacion en general.
