@@ -1,0 +1,59 @@
+{%- liquid
+  assign card_id = card_id | default: product.id
+  assign featured_image = product.featured_image
+  assign product_title = product.title | escape
+  assign product_url = product.url
+  assign is_available = product.available
+  assign image_alt = featured_image.alt | default: product.title | escape
+
+  if featured_image != blank
+    assign image_src = featured_image | image_url: width: 600
+    assign image_srcset = featured_image | image_url: width: 300 | append: ' 300w, '
+    assign image_srcset = image_srcset | append: featured_image | image_url: width: 450 | append: ' 450w, '
+    assign image_srcset = image_srcset | append: featured_image | image_url: width: 600 | append: ' 600w'
+    assign image_sizes = '(min-width: 990px) 25vw, (min-width: 750px) 50vw, 100vw'
+  endif
+-%}
+
+<li class="recommended-products__item"{% if shopify_attributes %} {{ shopify_attributes }}{% endif %}>
+  <article class="recommended-products__card" aria-labelledby="product-title-{{ card_id }}">
+    <a href="{{ product_url }}" class="recommended-products__media-link" aria-label="{{ button_label }}: {{ product.title | escape }}">
+      <div class="recommended-products__media">
+        {%- if featured_image != blank -%}
+          <img
+            class="recommended-products__image"
+            src="{{ image_src }}"
+            srcset="{{ image_srcset }}"
+            sizes="{{ image_sizes }}"
+            alt="{{ image_alt }}"
+            width="{{ featured_image.width }}"
+            height="{{ featured_image.height }}"
+            loading="lazy"
+            decoding="async"
+          >
+        {%- else -%}
+          <div class="recommended-products__placeholder" role="img" aria-label="Imagen no disponible">
+            {{ 'product-1' | placeholder_svg_tag: 'recommended-products__placeholder-svg' }}
+          </div>
+        {%- endif -%}
+        {%- unless is_available -%}
+          <span class="recommended-products__badge" aria-hidden="true">{{ 'products.product.sold_out' | t | default: 'Agotado' }}</span>
+        {%- endunless -%}
+      </div>
+    </a>
+    <div class="recommended-products__content">
+      <h3 id="product-title-{{ card_id }}" class="recommended-products__name">
+        <a href="{{ product_url }}" class="recommended-products__name-link">{{ product_title }}</a>
+      </h3>
+      <p class="recommended-products__price">
+        {%- if product.compare_at_price > product.price -%}
+          <span class="visually-hidden">Precio regular</span>
+          <s class="recommended-products__price-compare">{{ product.compare_at_price | money }}</s>
+          <span class="visually-hidden">Precio de oferta</span>
+        {%- endif -%}
+        <span class="recommended-products__price-current">{{ product.price | money }}</span>
+      </p>
+      <a href="{{ product_url }}" class="recommended-products__button button"{% unless is_available %} aria-disabled="true"{% endunless %}>{{ button_label | escape }}</a>
+    </div>
+  </article>
+</li>

@@ -1,0 +1,187 @@
+{%- liquid
+  assign heading_id = section.id | append: '-heading'
+  assign button_label = section.settings.button_label | default: 'Ver producto'
+
+  assign product_list = section.settings.product_list
+  assign has_product_list = false
+  if product_list != blank and product_list.size > 0
+    assign has_product_list = true
+  endif
+
+  assign has_blocks = false
+  unless has_product_list
+    for block in section.blocks
+      if block.settings.product != blank
+        assign has_blocks = true
+        break
+      endif
+    endfor
+  endunless
+
+  assign has_products = false
+  if has_product_list or has_blocks
+    assign has_products = true
+  endif
+-%}
+
+{{ 'recommended-products-custom.css' | asset_url | stylesheet_tag }}
+
+<section
+  id="shopify-section-{{ section.id }}"
+  class="recommended-products section-{{ section.id }} color-{{ section.settings.color_scheme }}"
+  aria-labelledby="{{ heading_id }}"
+>
+  <div class="recommended-products__container page-width">
+    <header class="recommended-products__header">
+      {%- if section.settings.title != blank -%}
+        <h2 id="{{ heading_id }}" class="recommended-products__title">
+          {{ section.settings.title | escape }}
+        </h2>
+      {%- endif -%}
+
+      {%- if section.settings.description != blank -%}
+        <div class="recommended-products__description rte">
+          {{ section.settings.description }}
+        </div>
+      {%- endif -%}
+    </header>
+
+    {%- if has_products -%}
+      <ul class="recommended-products__grid" role="list" aria-label="Productos recomendados">
+        {%- if has_product_list -%}
+          {%- for product in product_list -%}
+            {%- if product != blank -%}
+              {%- render 'recommended-product-card',
+                product: product,
+                button_label: button_label,
+                card_id: product.id
+              -%}
+            {%- endif -%}
+          {%- endfor -%}
+        {%- else -%}
+          {%- for block in section.blocks -%}
+            {%- assign product = block.settings.product -%}
+            {%- if product != blank -%}
+              {%- render 'recommended-product-card',
+                product: product,
+                button_label: button_label,
+                card_id: block.id,
+                shopify_attributes: block.shopify_attributes
+              -%}
+            {%- endif -%}
+          {%- endfor -%}
+        {%- endif -%}
+      </ul>
+    {%- else -%}
+      <div class="recommended-products__empty" role="status">
+        <p class="recommended-products__empty-text">
+          {{ section.settings.empty_message | default: 'Aún no hay productos recomendados. Agrega bloques «Producto» o selecciona productos en la lista.' }}
+        </p>
+      </div>
+    {%- endif -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Productos recomendados",
+  "tag": "section",
+  "class": "section-recommended-products",
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "settings": [
+    {
+      "type": "header",
+      "content": "Contenido"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Título",
+      "default": "Productos recomendados"
+    },
+    {
+      "type": "richtext",
+      "id": "description",
+      "label": "Descripción",
+      "default": "<p>Descubre nuestra selección especial para ti.</p>"
+    },
+    {
+      "type": "product_list",
+      "id": "product_list",
+      "label": "Productos",
+      "limit": 12,
+      "info": "Si está vacía, se usan los bloques «Producto»."
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Texto del botón",
+      "default": "Ver producto"
+    },
+    {
+      "type": "text",
+      "id": "empty_message",
+      "label": "Mensaje cuando no hay productos",
+      "default": "Aún no hay productos recomendados. Agrega bloques «Producto» o selecciona productos en la lista."
+    },
+    {
+      "type": "header",
+      "content": "Diseño"
+    },
+    {
+      "type": "select",
+      "id": "columns_desktop",
+      "label": "Columnas en escritorio",
+      "options": [
+        { "value": "3", "label": "3 columnas" },
+        { "value": "4", "label": "4 columnas" }
+      ],
+      "default": "4"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Esquema de color",
+      "default": "scheme-1"
+    },
+    {
+      "type": "paragraph",
+      "content": "También puedes agregar bloques «Producto» y reordenarlos. Se usan solo si la lista de arriba está vacía."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "product",
+      "name": "Producto",
+      "limit": 12,
+      "settings": [
+        {
+          "type": "product",
+          "id": "product",
+          "label": "Producto"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Productos recomendados",
+      "blocks": [
+        { "type": "product" },
+        { "type": "product" },
+        { "type": "product" },
+        { "type": "product" }
+      ]
+    }
+  ],
+  "max_blocks": 12
+}
+{% endschema %}
+
+<style>
+  .section-{{ section.id }} {
+    --recommended-columns-desktop: {{ section.settings.columns_desktop | default: '4' }};
+  }
+</style>
